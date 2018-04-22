@@ -35,3 +35,8 @@ Route::post('register', [
     'as'     => 'register.post',
     'uses'   => 'RegisterController@POSTRegister'
 ]);
+
+Route::get('logout', [
+    'as'     => 'logout.get',
+    'uses'   => 'LogoutController@GETLogout'
+]);

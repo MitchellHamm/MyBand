@@ -7,13 +7,13 @@
 
         <title>My Band</title>
 
-        <!-- Fonts -->
-        <link href="https://fonts.googleapis.com/css?family=Raleway:100,600" rel="stylesheet" type="text/css">
+        <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet" type="text/css">
+        <script link="{{ asset('js/bootstrap.min.js') }}" type="text/javascript"></script>
     </head>
     <body>
         <div class="position-ref full-height">
             <div class="welcome-header full-height">
-            @include('modules/navbar', ['linkStyle' => 'links-light', 'container' => 'container-welcome'])
+            @include('modules/navbar')
 
             <div class="content fade-in-2">
                 <div class="title-light m-b-md">

@@ -6,17 +6,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <title>MyBand</title>
+
+        <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet" type="text/css">
+        <script link="{{ asset('js/bootstrap.min.js') }}" type="text/javascript"></script>
     </head>
     <body>
         <div class="flex-center position-ref full-height">
-            <div class="top-right links">
-                @auth
-                    <a href="{{ url('/home') }}">Home</a>
-                @else
-                    <a href="{{ route('login.get') }}">Login</a>
-                    <a href="{{ route('register.get') }}">Register</a>
-                @endauth
-            </div>
+            @include('modules/navbar')
         </div>
     </body>
 </html>
