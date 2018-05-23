@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Exception\HttpResponseException;
+use App\Http\Services\UserService;
 
 class AuthController extends Controller
 {
@@ -37,6 +38,53 @@ class AuthController extends Controller
                 $this->getCredentials($request)
             )) {
                 return $this->onUnauthorized();
+            }
+        } catch (JWTException $e) {
+            // Something went wrong whilst attempting to encode the token
+            return $this->onJwtGenerationError();
+        }
+
+        // All good so return the token
+        return $this->onAuthorized($token);
+    }
+
+    /**
+     * Handle a register request to the application.
+     *
+     * @param \Illuminate\Http\Request $request
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function postRegister(Request $request)
+    {
+        try {
+            $this->validate($request, [
+                'email' => 'required|email|max:255',
+                'password' => 'required',
+                'passwordConfirm' => 'required',
+            ]);
+        } catch (ValidationException $e) {
+            return $e->getResponse();
+        }
+
+        try {
+            $data = array(
+                'email' => $request->get('email'),
+                'password' => $request->get('password'),
+                'passwordConfirm' => $request->get('passwordConfirm'),
+            );
+
+            if(UserService::createUser($data)) {
+                // Attempt to verify the credentials and create a token for the user
+                if (!$token = JWTAuth::attempt(
+                    $this->getCredentials($request)
+                )) {
+                    return $this->onUnauthorized();
+                }
+            } else {
+                return array(
+                    'status' => '500',
+                    'message' => 'Error creating account');
             }
         } catch (JWTException $e) {
             // Something went wrong whilst attempting to encode the token
