@@ -1,60 +1,119 @@
-<p align="center"><img src="https://laravel.com/assets/img/components/logo-laravel.svg"></p>
+# Lumen with JWT Authentication
+Basically this is a starter kit for you to integrate Lumen with [JWT Authentication](https://jwt.io/).
+If you want to Lumen + Dingo + JWT for your current application, please check [here](https://github.com/krisanalfa/lumen-dingo-adapter).
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/d/total.svg" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
-</p>
+## What's Added
 
-## About Laravel
+- [Lumen 5.4](https://github.com/laravel/lumen/tree/v5.4.0).
+- [JWT Auth](https://github.com/tymondesigns/jwt-auth) for Lumen Application. <sup>[1]</sup>
+- [Dingo](https://github.com/dingo/api) to easily and quickly build your own API. <sup>[1]</sup>
+- [Lumen Generator](https://github.com/flipboxstudio/lumen-generator) to make development even easier and faster.
+- [CORS and Preflight Request](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS) support.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as:
+> [1] Added via [this package](https://packagist.org/packages/krisanalfa/lumen-dingo-adapter).
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Quick Start
 
-Laravel is accessible, yet powerful, providing tools needed for large, robust applications.
+- Clone this repo or download it's release archive and extract it somewhere
+- You may delete `.git` folder if you get this code via `git clone`
+- Run `composer install`
+- Run `php artisan jwt:generate`
+- Configure your `.env` file for authenticating via database
+- Set the `API_PREFIX` parameter in your .env file (usually `api`).
+- Run `php artisan migrate --seed`
 
-## Learning Laravel
+## A Live PoC
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of any modern web application framework, making it a breeze to get started learning the framework.
+- Run a PHP built in server from your root project:
 
-If you're not in the mood to read, [Laracasts](https://laracasts.com) contains over 1100 video tutorials on a range of topics including Laravel, modern PHP, unit testing, JavaScript, and more. Boost the skill level of yourself and your entire team by digging into our comprehensive video library.
+```sh
+php -S localhost:8000 -t public/
+```
 
-## Laravel Sponsors
+Or via artisan command:
 
-We would like to extend our thanks to the following sponsors for helping fund on-going Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell):
+```sh
+php artisan serve
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[British Software Development](https://www.britishsoftware.co)**
-- [Fragrantica](https://www.fragrantica.com)
-- [SOFTonSOFA](https://softonsofa.com/)
-- [User10](https://user10.com)
-- [Soumettre.fr](https://soumettre.fr/)
-- [CodeBrisk](https://codebrisk.com)
-- [1Forge](https://1forge.com)
-- [TECPRESSO](https://tecpresso.co.jp/)
-- [Runtime Converter](http://runtimeconverter.com/)
-- [WebL'Agence](https://weblagence.com/)
-- [Invoice Ninja](https://www.invoiceninja.com)
+To authenticate a user, make a `POST` request to `/api/auth/login` with parameter as mentioned below:
 
-## Contributing
+```
+email: johndoe@example.com
+password: johndoe
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Request:
 
-## Security Vulnerabilities
+```sh
+curl -X POST -F "email=johndoe@example.com" -F "password=johndoe" "http://localhost:8000/api/auth/login"
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Response:
+
+```
+{
+  "success": {
+    "message": "token_generated",
+    "token": "a_long_token_appears_here"
+  }
+}
+```
+
+- With token provided by above request, you can check authenticated user by sending a `GET` request to: `/api/auth/user`.
+
+Request:
+
+```sh
+curl -X GET -H "Authorization: Bearer a_long_token_appears_here" "http://localhost:8000/api/auth/user"
+```
+
+Response:
+
+```
+{
+  "success": {
+    "user": {
+      "id": 1,
+      "name": "John Doe",
+      "email": "johndoe@example.com",
+      "created_at": null,
+      "updated_at": null
+    }
+  }
+}
+```
+
+- To refresh your token, simply send a `PATCH` request to `/api/auth/refresh`.
+- Last but not least, you can also invalidate token by sending a `DELETE` request to `/api/auth/invalidate`.
+- To list all registered routes inside your application, you may execute `php artisan route:list`
+
+```
+⇒  php artisan route:list
++--------+----------------------+---------------------+------------------------------------------+------------------+------------+
+| Verb   | Path                 | NamedRoute          | Controller                               | Action           | Middleware |
++--------+----------------------+---------------------+------------------------------------------+------------------+------------+
+| POST   | /api/auth/login      | api.auth.login      | App\Http\Controllers\Auth\AuthController | postLogin        |            |
+| GET    | /api                 | api.index           | App\Http\Controllers\APIController       | getIndex         | jwt.auth   |
+| GET    | /api/auth/user       | api.auth.user       | App\Http\Controllers\Auth\AuthController | getUser          | jwt.auth   |
+| PATCH  | /api/auth/refresh    | api.auth.refresh    | App\Http\Controllers\Auth\AuthController | patchRefresh     | jwt.auth   |
+| DELETE | /api/auth/invalidate | api.auth.invalidate | App\Http\Controllers\Auth\AuthController | deleteInvalidate | jwt.auth   |
++--------+----------------------+---------------------+------------------------------------------+------------------+------------+
+```
+
+## ETC
+
+I made a Postman collection [here](https://www.getpostman.com/collections/1090b93eaa1ece4b09f2).
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```
+Laravel and Lumen is a trademark of Taylor Otwell
+Sean Tymon officially holds "Laravel JWT" license
+```
+
+## Donation
+
+If this project help you reduce time to develop, you can give me a cup of coffee :) 
+
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=krisan47%40gmail%2ecom&lc=ID&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted)
